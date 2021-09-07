@@ -1,5 +1,5 @@
+import sys
 import os
-import types
 import tweepy
 import random
 import lyricsgenius
@@ -27,22 +27,25 @@ def pick_lyrics(lyrics):  # todo retry if picked lines are identical
     return tweet
 
 
-def tweet_lyrics(lyrics, auth):
-    auth = tweepy.OAuthHandler(auth.api_key, auth.api_secret)
-    auth.set_access_token(auth.access_token, auth.access_token_secret)
+def tweet_lyrics(lyrics, keys):
+    auth = tweepy.OAuthHandler(keys["TWITTER_API_KEY"], keys["TWITTER_API_SECRET"])
+    auth.set_access_token(keys["TWITTER_ACCESS_TOKEN"], keys["TWITTER_ACCESS_TOKEN_SECRET"])
     api = tweepy.API(auth)
     api.update_status(lyrics)
 
 
-if __name__ == '__main__':
-    twitter_auth = types.SimpleNamespace()
+def get_auth():
+    keys = {}
     try:
-        twitter_auth.api_key = os.environ['TWITTER_API_KEY']
-        twitter_auth.api_secret = os.environ['TWITTER_API_SECRET']
-        twitter_auth.access_token = os.environ['TWITTER_ACCESS_TOKEN']
-        twitter_auth.access_token_secret = os.environ['TWITTER_ACCESS_TOKEN_SECRET']
+        keys["TWITTER_API_KEY"] = os.environ['TWITTER_API_KEY']
+        keys["TWITTER_API_SECRET"] = os.environ['TWITTER_API_SECRET']
+        keys["TWITTER_ACCESS_TOKEN"] = os.environ['TWITTER_ACCESS_TOKEN']
+        keys["TWITTER_ACCESS_TOKEN_SECRET"] = os.environ['TWITTER_ACCESS_TOKEN_SECRET']
     except KeyError as err:
-        print(f"Given key not found - {err}")
+        sys.exit(f"Given key not found - {err}")
+    return keys
 
-    tweet_lyrics(pick_lyrics(pick_song()), twitter_auth)
+
+if __name__ == '__main__':
+    tweet_lyrics(pick_lyrics(pick_song()), get_auth())
 
